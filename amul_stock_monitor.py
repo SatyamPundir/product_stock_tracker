@@ -275,13 +275,15 @@ class StockMonitor:
             return False
 
     def send_telegram_notification(self, product_name, product_url, message):
-        """Send Telegram notification if configured"""
+        """Send Telegram notification to both personal and group chat if configured"""
         bot_token = os.getenv("TELEGRAM_BOT_TOKEN")
-        chat_id = os.getenv("TELEGRAM_CHAT_ID")
-        
-        if not bot_token or not chat_id:
+        chat_id = os.getenv("TELEGRAM_CHAT_ID")      # Your personal Telegram user ID
+        group_id = os.getenv("TELEGRAM_GROUP_ID")    # The group's chat ID (usually starts with -)
+
+        if not bot_token or not chat_id or not group_id:
+            self.logger.warning("Missing Telegram configuration.")
             return False
-            
+
         try:
             telegram_message = (
                 f"🚨 *STOCK ALERT*\n\n"
@@ -290,24 +292,27 @@ class StockMonitor:
                 f"📦 Status: {message}\n"
                 f"⏰ {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
             )
-            
+
             url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
-            data = {
-                "chat_id": chat_id,
-                "text": telegram_message,
-                "parse_mode": "Markdown",
-                "disable_web_page_preview": False
-            }
-            
-            response = requests.post(url, data=data, timeout=10)
-            response.raise_for_status()
-            
-            self.logger.info(f"Telegram notification sent for {product_name}")
+
+            for target_chat_id in [chat_id, group_id]:
+                data = {
+                    "chat_id": target_chat_id,
+                    "text": telegram_message,
+                    "parse_mode": "Markdown",
+                    "disable_web_page_preview": False
+                }
+
+                response = requests.post(url, data=data, timeout=10)
+                response.raise_for_status()
+                self.logger.info(f"Telegram notification sent to chat_id {target_chat_id} for {product_name}")
+
             return True
-            
+
         except Exception as e:
             self.logger.error(f"Failed to send Telegram notification: {str(e)}")
             return False
+
 
     def run_single_check(self):
         """Run a single check cycle (useful for cron jobs)"""
