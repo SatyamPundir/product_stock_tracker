@@ -1,0 +1,64 @@
+# .github/workflows/stock_monitor.yml
+name: Stock Monitor
+
+on:
+  schedule:
+    - cron: '30 1 * * *'
+    - cron: '30 2 * * *'
+    - cron: '30 3 * * *'
+    - cron: '30 4 * * *'
+    - cron: '30 5 * * *'
+    - cron: '30 6 * * *'
+    - cron: '30 7 * * *'
+    - cron: '30 8 * * *'
+    - cron: '30 9 * * *'
+    - cron: '30 10 * * *'
+    - cron: '30 16 * * *'
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y chromium-browser chromium-chromedriver
+    
+    - name: Install Python dependencies
+      run: |
+        pip install selenium beautifulsoup4 requests
+    
+    - name: Run stock monitor
+      env:
+        SINGLE_CHECK: "true"
+        CHROME_BIN: "/usr/bin/chromium-browser"
+        CHROMEDRIVER_PATH: "/usr/bin/chromedriver"
+        
+        # Email configuration
+        SENDER_EMAIL: ${{ secrets.SENDER_EMAIL }}
+        SENDER_PASSWORD: ${{ secrets.SENDER_PASSWORD }}
+        RECIPIENT_EMAIL: ${{ secrets.RECIPIENT_EMAIL }}
+        SMTP_SERVER: "smtp.gmail.com"
+        SMTP_PORT: "587"
+        
+        # Telegram (optional)
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        
+        # Products to monitor (JSON format)
+        PRODUCTS_JSON: ${{ secrets.PRODUCTS_JSON }}
+        
+        # Other settings
+        CHECK_INTERVAL: "300"
+        USER_AGENT: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+      
+      run: python amul_stock_monitor.py
