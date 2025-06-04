@@ -363,7 +363,7 @@ class StockMonitor:
                     # Check if status changed from out of stock to in stock
                     if is_in_stock and last_status.get(product_name) in [None, False]:
                         self.logger.info(f"ALERT: {product_name} is NOW IN STOCK!")
-                        self.send_notification(product_name, product['url'], message)
+                        # self.send_notification(product_name, product['url'], message)
                         self.send_telegram_notification(product_name, product['url'], message)
                     elif is_in_stock:
                         self.logger.info(f"OK: {product_name} is in stock")
