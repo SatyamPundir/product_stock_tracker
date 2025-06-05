@@ -313,7 +313,6 @@ class StockMonitor:
             self.logger.error(f"Failed to send Telegram notification: {str(e)}")
             return False
 
-
     def run_single_check(self):
         """Run a single check cycle (useful for cron jobs)"""
         self.logger.info("Starting single stock check...")
@@ -330,7 +329,7 @@ class StockMonitor:
                 
                 if is_in_stock:
                     self.logger.info(f"ALERT: {product_name} is IN STOCK!")
-                    self.send_notification(product_name, product['url'], message)
+                    # self.send_notification(product_name, product['url'], message)
                     self.send_telegram_notification(product_name, product['url'], message)
                 else:
                     self.logger.info(f"WAITING: {product_name} is out of stock")
